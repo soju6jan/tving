@@ -106,15 +106,16 @@ class TvingBasic(object):
                     entity.value = value
             db.session.commit()                    
             if flag_login:
-                if TvingBasic.login():
+                if LogicBasic.login():
                     return 1
                 else: 
                     return 2
-            else:
-                return 0 #저장
+            return True
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
+            logger.error('key:%s value:%s', key, value)
+            return False
 
     @staticmethod
     def ffmpeg_listener(**arg):

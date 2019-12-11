@@ -223,7 +223,7 @@ def ajax(sub):
                 logger.error('Exception:%s', e)
                 logger.error(traceback.format_exc())
         # 자동
-        elif sub == 'auto':
+        elif sub == 'scheduler':
             try:
                 go = request.form['scheduler']
                 logger.debug('scheduler :%s', go)
