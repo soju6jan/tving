@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+<ul class="nav nav-pills bg-light shadow text-dark" >
+  <li class="nav-item"><a class="nav-link active" href="/tving/basic/setting">설정</a></li>
+  <li class="nav-item"><a class="nav-link" href="/tving/basic/download">다운로드</a></li>
+</ul>
+<div class="d-inline-block"></div>
+
+<div>
+  <form id="setting">
+  {{ macros.setting_radio('login_type', '로그인 타입', ['CJONE', 'TVING'], value=arg['login_type']) }}
+  {{ macros.setting_input_text('id', 'ID', value=arg['id'], col='3') }}
+  {{ macros.setting_input_text_and_buttons('pw', '암호', [['login', '확인']], value=arg['pw'], col='4', type='password') }}
+  {{ macros.setting_select('quality', '기본 화질', [['FHD', 'FHD'], ['HD', 'HD'], ['SD', 'SD']], col='3', value=arg['quality']) }}
+  {{ macros.setting_input_text('save_path', '저장 폴더', value=arg['save_path'], desc='정상적으로 완료된 파일이 이동할 폴더 입니다. ') }}
+  {{ macros.setting_input_int('max_pf_count', '허용 Packet Fail 수', value=arg['max_pf_count'], min='0', desc=['이 값보다 Packet Fail 횟수가 더 많으면 실패처리 합니다.', '0 : Packet Fail이 발생하면 바로 실패처리.', '-1 : 실패처리 하지 않음.']) }}
+  {{ macros.setting_checkbox('use_proxy', 'Proxy 사용', value=arg['use_proxy'], desc='VPS 등 IP 차단된 곳에서 사용할 경우 Proxy사용') }}
+  {{ macros.setting_input_text_and_buttons('proxy_url', 'Proxy URL',[['proxy_php_download_btn', 'Proxy용 PHP 파일 다운로드']], value=arg['proxy_url'], desc='sjva_tving.php 파일 URL') }}
+  {{ macros.setting_input_text('device_id', 'Device ID', value=arg['device_id'], desc='') }}
+  {{ macros.setting_button([['setting_save_btn', '저장']]) }}
+  </form>
+</div> <!--전체-->
+
+
+<script type="text/javascript">
+var package_name = 'tving';
+
+$(document).ready(function(){
+});
+
+//설정 저장
+$("#setting_save_btn").click(function(e) {
+  e.preventDefault();
+  var formData = get_formdata('#setting');
+  $.ajax({
+    url: '/' + package_name + '/ajax/setting_save',
+    type: "POST", 
+    cache: false,
+    data: formData,
+    dataType: "json",
+    success: function (ret) {
+      if (ret == 0) {
+        $.notify('<strong>설정을 저장하였습니다.</strong>', {
+          type: 'success'
+        });
+      } else if (ret == 1) {
+        $.notify('<strong>설정과 로그인 정보를 저장하였습니다.</strong>', {
+          type: 'success'
+        });
+      } else if (ret == 2) {
+        $.notify('<strong>설정을 저장하였으나 로그인에 실패하였습니다.</strong>', {
+          type: 'warning'
+        });
+      }
+    }
+  });
+});
+
+//로그인 인증
+$("#login").click(function(e) {
+  e.preventDefault(); 
+  tmp = ($("#login_type0").prop('checked')) ? '0' : '1';
+  $.ajax({
+    url: '/' + package_name + '/ajax/login',
+    type: "POST", 
+    cache: false,
+    data: {id:$("#id").val(), pw:$("#pw").val(), login_type:tmp},
+    dataType: "json",
+    success: function (list) {
+      document.getElementById("modal_title").innerHTML = "Login Result";
+      document.getElementById("modal_body").innerHTML = "<pre>"+JSON.stringify(list, null, 2) + "</pre>";
+      $("#large_modal").modal();
+    }
+  });
+});
+
+$("#proxy_php_download_btn").click(function(e) {
+  e.preventDefault();
+  window.location.href='/download_file/static/file/sjva_tving.php';
+});
+
+</script>    
+{% endblock %}

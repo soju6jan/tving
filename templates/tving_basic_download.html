@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% block content %}
+<ul class="nav nav-pills bg-light shadow text-dark" >
+  <li class="nav-item"><a class="nav-link" href="/tving/basic/setting">설정</a></li>
+  <li class="nav-item"><a class="nav-link active" href="/tving/basic/download">다운로드</a></li>
+</ul>
+<div class="d-inline-block"></div>
+
+<div>
+  <form>
+    {{ macros.setting_input_text_and_buttons('url', 'URL or Code', [['analyze', '분석'], ['go_tving', '티빙']], desc='URL & Program Code & Episode Code') }}
+  </form>
+  <div id='detail'></div>
+  <div id="more"></div>
+</div> <!--전체-->
+
+
+<script type="text/javascript">
+var package_name = 'tving';
+$(document).ready(function(){
+  if ( "{{arg['code']}}" != "None" && "{{arg['code']}}" != "" ) {
+    episode = $(this).data('episode');
+    document.getElementById("url").value = "{{arg['code']}}";
+    document.getElementById("analyze").click();
+  }
+});
+
+$("body").on('click', '#go_tving', function(e){
+  e.preventDefault();
+  window.open('https://www.tving.com', '_blank'); 
+});
+
+//분석
+$("body").on('click', '#analyze', function(e){
+  e.preventDefault();
+  if ($("#url").val() == "") {
+    $.notify('<strong>URL이나 Code를 입력하세요.</strong>', {
+      type: 'warning'
+    });
+    return;
+  }
+  $.ajax({
+    url: '/' + package_name + '/ajax/analyze',
+    type: "POST", 
+    cache: false,
+    data: {url: $("#url").val()},
+    dataType: "json",
+    success: function (data) {
+      make_analyse_result(data)
+    }
+  });
+});
+
+//에피소드 다운로드 시작
+$("body").on('click', '#episode_download_start', function(e){
+  e.preventDefault();
+  url = $(this).data('url');
+  filename = $(this).data('filename');
+  $.ajax({
+    url: '/' + package_name + '/ajax/episode_download_url',
+    type: "POST", 
+    cache: false,
+    data: {url:url, filename:filename},
+    dataType: "json",
+    success: function (list) {
+    }
+  });
+});
+
+$("body").on('click', '#movie_download', function(e){
+  e.preventDefault();
+  url = $(this).data('url');
+  filename = $(this).data('filename');
+  $.ajax({
+    url: '/' + package_name + '/ajax/movie_download',
+    type: "POST", 
+    cache: false,
+    data: {url:url, filename:filename},
+    dataType: "json",
+    success: function (list) {
+    }
+  });
+});
+
+// 프로그램 More 버튼
+$("body").on('click', '#more_btn', function(e){
+  e.preventDefault();
+  code = $(this).data('code');
+  page = parseInt($(this).data('page')) + 1;
+  $.ajax({
+    url: '/' + package_name + '/ajax/program_page',
+    type: "POST", 
+    cache: false,
+    data: {code:code, page:page},
+    dataType: "json",
+    success: function (data) {
+      make_program_page(data);
+    }
+  });
+});
+
+// 에피소드 서치
+$("body").on('click', '#episode_search', function(e){
+  e.preventDefault();
+  episode = $(this).data('episode');
+  document.getElementById("url").value = episode;
+  document.getElementById("analyze").click();
+});
+
+// 프로그램 서치
+$("body").on('click', '#program_search', function(e){
+  e.preventDefault();
+  program = $(this).data('program');
+  document.getElementById("url").value = program;
+  document.getElementById("analyze").click();
+});
+
+
+
+function make_analyse_result(data) {
+  if (data['url_type'] == 'None') {
+    $.notify('<strong>유효한 값이 아닙니다.</strong>', {
+      type: 'warning'
+    });
+  } else if (data['url_type'] == 'episode') {
+    if (data.ret) {
+      str = m_row_start();
+      tmp = '<img src="http://image.tving.com' + data.data.json.body.content.info.episode.image[0].url + '" class="img-fluid">'
+      str += m_col(3, tmp)
+      tmp = '<strong>' + data.data.program_name + '  ' + data.data.frequency + '회</strong><br>';
+      tmp += data.data.json.body.content.info.episode.broadcast_datetime + '  ' + '<br><p>';
+      if ( data.data.json.body.content.info.episode.synopsis.ko != null)
+        tmp += '<p>' + data.data.json.body.content.info.episode.synopsis.ko.replace('\n', '<br>') + '<p>';
+      tmp += '파일명 : ' + data.data.filename;
+
+      tmp2 = m_button('episode_download_start', '다운로드', [{'key':'filename', 'value':data.data.filename}, {'key':'url', 'value':data.data.vod_url}])
+      tmp2 += m_button('program_search', '프로그램 검색', [{'key':'program', 'value':data.data.program_code}])
+      tmp += m_button_group(tmp2)
+      str += m_col(9, tmp)
+      str += m_row_end();
+      document.getElementById("detail").innerHTML = str;
+      document.getElementById("more").innerHTML = '';
+    } else {
+      $.notify('<strong>'+data.data.message+'</strong>', {
+        type: 'warning'
+      });
+    }
+  } else if (data['url_type'] == 'program') {
+    make_program_page(data);
+  } else if (data['url_type'] == 'movie') {
+    //console.log(data)
+    str = m_row_start();
+    tmp = '<img src="' + data.data.body.content.info.movie.stcut_master_img + '" class="img-fluid">'
+    str += m_col(3, tmp)
+    tmp = '<strong>' + data.data.body.content.info.movie.name.ko+'</strong><br><br>';
+    if ( data.data.body.content.info.movie.story.ko != null)
+      tmp += '<p>' + data.data.body.content.info.movie.story.ko.replace('\n', '<br>') + '<p>';
+    if (data.data.ret.ret == 'no_4k') {
+      tmp += '4K 영상 없음<br>';  
+    } else if (data.data.ret.ret == 'need_pay') {
+      tmp += '권한없음 (Device ID 오류 혹은 이용권 제한)<br>';  
+    } else {
+      tmp += '파일명 : ' + data.data.ret.filename;
+      tmp2 = m_button('movie_download', '다운로드', [{'key':'filename', 'value':data.data.ret.filename}, {'key':'url', 'value':data.data.ret.decrypted_url}])
+      tmp += m_button_group(tmp2)
+    }
+    str += m_col(9, tmp)
+    str += m_row_end();
+    document.getElementById("detail").innerHTML = str;
+    document.getElementById("more").innerHTML = '';
+  }
+}
+
+
+function make_program_page(ret) {
+  data = ret.data.body.result
+  str = '';
+  for (i in data) {
+    str += '<hr>';
+    str += '<div class="row">';
+    str += '<div class="col-sm-3">'
+    str += '<img src="http://image.tving.com' + data[i].episode.image[0].url + '" class="img-fluid">'
+    str += '</div>';
+    str += '<div class="col-sm-9">'
+    str += '<div>';
+    str += '<strong>' + data[i].vod_name.ko+ '</strong>';
+    str += '<br>';
+    str += data[i].episode.broadcast_date + '<br><p></p>';
+    if ( data[i].episode.synopsis.ko != null)
+      str += '<p>' + data[i].episode.synopsis.ko.replace('\n', '<br>') + '</p>';
+    str += '</div>';
+    str += '<div>';
+    str += '<button id="episode_search" name="submit" class="btn btn-sm  btn-outline-success" data-episode="'+data[i].episode.code + '">에피소드</button>';
+    str += '</div>';
+    str += '</div>';
+    str += '</div>';
+  }
+  if (ret.page == '1') {
+    document.getElementById("detail").innerHTML = str;
+  } else {
+    document.getElementById("detail").innerHTML += str;
+  }
+  
+  if (ret.data.body.has_more == 'Y') {
+    str = '<div class="d-inline-block"></div><form>';
+    str += '<button id="more_btn" class="btn btn-outline-secondary btn-lg btn-block" type="button" data-code="'+ret.code+'" data-page="'+ret.page+'">More</button>'
+    str += '</form>';
+    document.getElementById("more").innerHTML = str;
+  } else {
+    document.getElementById("more").innerHTML = '';
+  }
+}
+  
+</script>    
+{% endblock %}

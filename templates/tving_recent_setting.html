@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<ul class="nav nav-pills bg-light shadow text-dark" >
+  <li class="nav-item"><a class="nav-link active" href="/tving/recent/setting">설정</a></li>
+  <li class="nav-item"><a class="nav-link" href="/tving/recent/list">목록</a></li>
+</ul>
+<div class="d-inline-block"></div>
+
+<div>
+  {{ macros.setting_global_scheduler_button(arg['is_include'], arg['is_running']) }}
+  <form id='setting' name='setting'>
+    {{ macros.setting_input_int('auto_interval', '스케쥴링 실행 주기', value=arg['auto_interval'], min='1', placeholder='10', desc='minute 단위') }}
+    {{ macros.setting_checkbox('auto_start', '시작시 자동실행', value=arg['auto_start'], desc='On : 시작시 자동으로 스케쥴러에 등록됩니다.') }}
+    {{ macros.setting_input_text('auto_save_path', '저장 폴더', value=arg['auto_save_path'], desc='정상적으로 완료된 파일이 이동할 폴더 입니다. ') }}
+    {{ macros.setting_select('auto_quality', '기본 화질', [['FHD', 'FHD'], ['HD', 'HD'], ['SD', 'SD']], col='3', value=arg['auto_quality']) }}
+    {{ macros.setting_input_int('auto_page', '탐색 페이지수', value=arg['auto_page'], min='1', placeholder='2') }}
+    {{ macros.setting_checkbox('retry_user_abort', '사용자 중지 항목 다시 받기', value=arg['retry_user_abort'], desc='On : 다음 스케쥴링 때 다시 받습니다.') }}
+    {{ macros.setting_radio('download_mode', '다운로드 모드', ['블랙리스트', '화이트리스트'], value=arg['download_mode']) }}
+    <div id="blacklist_div" class="collapse">
+    {{ macros.setting_input_textarea('except_channel', '제외 채널', value=arg['except_channel'], desc=['채널 이름과 일치하면 제외합니다.', ', 또는 Enter로 구분']) }}
+    {{ macros.setting_input_textarea('except_program', '제외 프로그램', value=arg['except_program'], desc=['이 곳에 있는 항목이 프로그램에 이름에 포함되어 있으면 제외합니다.', ', 또는 Enter로 구분']) }}
+    
+    </div>
+    <div id="whitelist_div" class="collapse">
+    {{ macros.setting_input_textarea('whitelist_program', '포함 프로그램', value=arg['whitelist_program'], desc=['이 곳에 있는 항목이 프로그램에 이름에 포함되어 있으면 다운로드합니다.', ', 또는 Enter로 구분']) }}
+    {{ macros.setting_checkbox('whitelist_first_episode_download', '첫회 받기', value=arg['whitelist_first_episode_download'], desc='On : 포함 프로그램에 방송이 없어도 첫 에피소드를 다운로드합니다.') }}
+    </div>
+    {{ macros.setting_button([['global_setting_save_btn', '저장']]) }}
+  </form>
+  {{ macros.m_hr() }}
+  {{ macros.setting_button([['global_reset_db_btn', '목록 전체 지우기']], left='DB정리' ) }}
+</div>
+
+<script type="text/javascript">
+var current_data = null;
+var package_name = 'tving';
+var download_mode = "{{arg['download_mode']}}";
+
+$(document).ready(function(){
+  set_download_mode(download_mode)
+});
+
+
+$('input[type=radio][name=download_mode]').change(function() {
+  set_download_mode(this.value);
+});
+
+function set_download_mode(type) {
+  $('input[name=download_mode]')[parseInt(type)].checked = true;
+
+  if ( type == '0') {
+    $('#blacklist_div').collapse('show')
+    $('#whitelist_div').collapse('hide')
+  } else {
+    $('#blacklist_div').collapse('hide')
+    $('#whitelist_div').collapse('show')
+  }
+}
+</script>    
+{% endblock %}
