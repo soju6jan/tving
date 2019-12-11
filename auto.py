@@ -55,7 +55,7 @@ class TvingAuto(object):
     def scheduler_start():
         try:
             interval = ModelSetting.get('auto_interval')
-            job = Job(package_name, package_name, interval, TvingAuto.scheduler_function, u"티빙 최신 TV VOD 다운로드", True)
+            job = Job(package_name, 'tving_auto', interval, TvingAuto.scheduler_function, u"티빙 최신 TV VOD 다운로드", True)
             scheduler.add_job_instance(job)
         except Exception as e: 
             logger.error('Exception:%s', e)

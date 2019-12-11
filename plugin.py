@@ -125,8 +125,9 @@ def second_menu(sub, sub2):
             try:
                 setting_list = db.session.query(ModelSetting).all()
                 arg = Util.db_list_to_dict(setting_list)
-                arg['scheduler'] = str(scheduler.is_include(package_name))
-                arg['is_running'] = str(scheduler.is_running(package_name))
+                arg['scheduler'] = str(scheduler.is_include('tving_auto'))
+                arg['is_running'] = str(scheduler.is_running('tving_auto'))
+
                 return render_template('%s_%s_%s.html' % (package_name, sub, sub2), arg=arg)
             except Exception as e: 
                 logger.error('Exception:%s', e)
