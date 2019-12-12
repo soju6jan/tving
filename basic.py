@@ -30,52 +30,7 @@ from .model import ModelSetting, Episode
         
 class TvingBasic(object):
     current_episode = None #다운받을 에피소드. 화면에서 정보를 보여주고 난 이후에 다운받기 ㄸ문
-    db_default = { 
-        'id' : '', 
-        'pw' : '', 
-        'token' : '',
-        'quality' : 'FHD',
-        'save_path' : os.path.join(path_data, 'download'),
-        'max_pf_count' : '0',
-        'login_type' : '0', 
-        'use_proxy' : 'False',
-        'proxy_url' : '',
-        'device_id' : '',
-        'recent_code' : ''
-    }
     
-    @staticmethod
-    def db_init(data=None):
-        try:
-            if data is None:
-                data = TvingBasic.db_default
-            for key, value in data.items():
-                if db.session.query(ModelSetting).filter_by(key=key).count() == 0:
-                    db.session.add(ModelSetting(key, value))
-            db.session.commit() 
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-
-    @staticmethod
-    def init():
-        try:
-            TvingBasic.db_init()
-            #PooqBasic.login()
-            #job = Job(package_name, '%s_login' % package_name, 60*24, PooqBasic.login, u"푹 Token 갱신을 위한 로그인", True)
-            #scheduler.add_job_instance(job)
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-    
-    @staticmethod
-    def get_setting_value(key):
-        try:
-            return db.session.query(ModelSetting).filter_by(key=key).first().value
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-
     @staticmethod
     def login():
         try:
@@ -91,31 +46,6 @@ class TvingBasic(object):
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
-
-    @staticmethod
-    def setting_save(req):
-        try:
-            flag_login = False
-            for key, value in req.form.items():
-                logger.debug('Key:%s Value:%s', key, value)
-                entity = db.session.query(ModelSetting).filter_by(key=key).with_for_update().first()
-                if key == 'id' or key == 'pw':
-                    if entity.value != value:
-                        flag_login = True
-                if entity is not None:
-                    entity.value = value
-            db.session.commit()                    
-            if flag_login:
-                if LogicBasic.login():
-                    return 1
-                else: 
-                    return 2
-            return True
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-            logger.error('key:%s value:%s', key, value)
-            return False
 
     @staticmethod
     def ffmpeg_listener(**arg):

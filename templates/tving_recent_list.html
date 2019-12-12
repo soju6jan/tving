@@ -157,10 +157,18 @@ $("body").on('click', '#reset_btn', function(e){
 $("body").on('click', '#basic_search', function(e){
   e.preventDefault();
   code = $(this).data('code');
-  var redirect = '/tving/basic';
-  $.redirectPost(redirect, {code: code});
-  $(location).attr('href', '/tving/basic?code=' + code)
+  $(location).attr('href', '/tving/basic/download?code=' + code)
 });
+
+
+// 기본에서  검색
+$("body").on('click', '#program_search_on_program_btn', function(e){
+  e.preventDefault();
+  code = $(this).data('code');
+  $(location).attr('href', '/tving/program/select?code=' + code)
+});
+
+
 
 $("body").on('click', '#json', function(e){
   e.preventDefault();

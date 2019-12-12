@@ -24,6 +24,7 @@ logger = get_logger(package_name)
 
 # 패키지
 import framework.tving.api as Tving
+from .logic import Logic
 from .basic import TvingBasic
 from .auto import TvingAuto
 from .model import ModelSetting
@@ -40,7 +41,7 @@ menu = {
 } 
 
 plugin_info = {
-    'version' : '0.1.0.0',
+    'version' : '0.1.1',
     'name' : '티빙 다운로드',
     'category_name' : 'vod',
     'icon' : '',
@@ -51,17 +52,10 @@ plugin_info = {
 }
 
 def plugin_load():
-    logger.debug('plugin_load:%s', package_name)
-    TvingBasic.init()
-    TvingAuto.init()
-    TvingProgram.init()
-    #import platform
-    #if platform.system() != 'Windows':
-    #    TvingAuto.init()
-    #    pass
+    Logic.plugin_load()
 
 def plugin_unload():
-    logger.debug('plugin_unload:%s', package_name)
+    Logic.plugin_unload()
 
    
 
@@ -125,8 +119,8 @@ def second_menu(sub, sub2):
             try:
                 setting_list = db.session.query(ModelSetting).all()
                 arg = Util.db_list_to_dict(setting_list)
-                arg['scheduler'] = str(scheduler.is_include('tving_auto'))
-                arg['is_running'] = str(scheduler.is_running('tving_auto'))
+                arg['scheduler'] = str(scheduler.is_include('tving_recent'))
+                arg['is_running'] = str(scheduler.is_running('tving_recent'))
 
                 return render_template('%s_%s_%s.html' % (package_name, sub, sub2), arg=arg)
             except Exception as e: 
@@ -183,7 +177,7 @@ def ajax(sub):
     try:     
         if sub == 'setting_save':
             try:
-                ret = TvingBasic.setting_save(request)
+                ret = Logic.setting_save(request)
                 return jsonify(ret)
             except Exception as e: 
                 logger.error('Exception:%s', e)
@@ -229,9 +223,9 @@ def ajax(sub):
                 go = request.form['scheduler']
                 logger.debug('scheduler :%s', go)
                 if go == 'true':
-                    TvingAuto.scheduler_start()
+                    Logic.scheduler_start()
                 else:
-                    TvingAuto.scheduler_stop()
+                    Logic.scheduler_stop()
                 return jsonify(go)
             except Exception as e: 
                 logger.error('Exception:%s', e)

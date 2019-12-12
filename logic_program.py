@@ -55,18 +55,7 @@ class TvingProgramEntity(object):
             if _.entity_id == entity_id:
                 return _
         return None
-    """
-    def as_dict(self):
-        import inspect
-        attributes = inspect.getmembers(self, lambda a:not(inspect.isroutine(a)))
-        logger.debug(attributes)
-        ret = [a for a in attributes if not(a[0].startswith('__') and a[0].endswith('__'))]
-        logger.debug(ret)
-        #ret = {x.name: getattr(self, x.name) for x in self.__table__.columns}
-        #ret['created_time'] = self.created_time.strftime('%m-%d %H:%M:%S') if self.created_time is not None else ''
-        #ret['end_time'] = self.end_time.strftime('%m-%d %H:%M:%S') if self.end_time is not None else ''
-        return ret
-    """
+    
 
 class TvingProgram(object):
     recent_code = None
@@ -80,19 +69,7 @@ class TvingProgram(object):
 
     current_ffmpeg_count = 0
 
-    db_default = { 
-        'program_auto_path' : os.path.join(path_data, 'download'),
-        'program_auto_make_folder' : 'True', 
-        'program_auto_count_ffmpeg' : '4', 
-    }
-
-    @staticmethod
-    def init():
-        try:
-            TvingBasic.db_init(TvingProgram.db_default)
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
+    
 
     @staticmethod
     def start():

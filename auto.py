@@ -26,53 +26,12 @@ from .basic import TvingBasic
 #########################################################
         
 class TvingAuto(object):
-    current_episode = None
-    db_default = { 
-        'auto_interval' : '10', 
-        'auto_start' : 'False', 
-        'auto_quality' : 'FHD',        
-        'retry_user_abort' : 'False',
-        'except_channel' : '',
-        'except_program' : '',
-        'auto_page' : '2',
-        'auto_save_path' : os.path.join(path_data, 'download'),
-        'download_mode' : '0',
-        'whitelist_program' : '', 
-        'whitelist_first_episode_download' : 'True'
-    }
-
-    @staticmethod
-    def init():
-        try:
-            TvingBasic.db_init(TvingAuto.db_default)
-            if ModelSetting.get('auto_start') == 'True':
-                TvingAuto.scheduler_start()
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
     
-    @staticmethod
-    def scheduler_start():
-        try:
-            interval = ModelSetting.get('auto_interval')
-            job = Job(package_name, 'tving_auto', interval, TvingAuto.scheduler_function, u"티빙 최신 TV VOD 다운로드", True)
-            scheduler.add_job_instance(job)
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-
-    @staticmethod
-    def scheduler_stop():
-        try:
-            logger.debug('auto scheduler_stop')
-            scheduler.remove_job('%s_auto' % package_name)
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
 
     @staticmethod
     def scheduler_function():
         try:
+            #logger.debug('start scheduler_function')
             import ffmpeg
             page = ModelSetting.get_int('auto_page')
             max_pf_count = ModelSetting.get('max_pf_count')
@@ -98,7 +57,7 @@ class TvingAuto(object):
                 vod_list = Tving.get_vod_list(page=i)["body"]["result"]
                 for vod in vod_list:
                     try:
-                        if not scheduler.is_include('tving_auto'):
+                        if not scheduler.is_include('tving_recent'):
                             logger.debug('not in scheduler')
                             return
                         code = vod["episode"]["code"]
@@ -183,6 +142,7 @@ class TvingAuto(object):
                    
                     
                     #break
+            #logger.debug('end scheduler_function')
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
