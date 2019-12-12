@@ -116,7 +116,7 @@ class TvingProgram(object):
         #while self.flag_stop == False:
             try:
                 while True:
-                    if TvingProgram.current_ffmpeg_count < int(TvingBasic.get_setting_value('program_auto_count_ffmpeg')):
+                    if TvingProgram.current_ffmpeg_count < ModelSetting.get_int('program_auto_count_ffmpeg'):
                         break
                     time.sleep(5)
 
@@ -144,7 +144,7 @@ class TvingProgram(object):
                 max_pf_count = ModelSetting.get('max_pf_count')
                 save_path = ModelSetting.get('program_auto_path')
 
-                if TvingBasic.get_setting_value('program_auto_make_folder') == 'True':
+                if ModelSetting.get('program_auto_make_folder') == 'True':
                     program_path = os.path.join(save_path, data['body']['content']['program_name'])
                     save_path = program_path
                 try:
