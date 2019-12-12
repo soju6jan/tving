@@ -26,7 +26,7 @@ from .basic import TvingBasic
 #########################################################
         
 class TvingAuto(object):
-    
+
 
     @staticmethod
     def scheduler_function():
