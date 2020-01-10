@@ -78,6 +78,8 @@ class TvingAuto(object):
                                     # 1:알수없는이유 시작실패, 2 타임오버, 3, 강제스톱.킬
                                     # 11:제외채널, 12:제외프로그램
                                     # 13:장르제외, 14:화이트리스트
+                                    # 9 : retry
+                                    # 8 : qvod
                                     logger.debug('ETC ABORT:%s', episode.etc_abort)
                                     continue
                                 elif episode.retry > 20:
@@ -93,6 +95,18 @@ class TvingAuto(object):
                                 db.session.add(episode)
                             else:
                                 episode = TvingBasic.make_episode_by_json(episode, json_data, url)
+
+                            # qvod 패스
+                            try:
+                                if len(json_data["body"]["content"]["info"]["episode"]["image"]) == 0:
+                                    if not ModelSetting.get_bool('download_qvod'):
+                                        logger.debug('is qvod.. pass')
+                                        episode.etc_abort = 8
+                                        db.session.commit()
+                                        continue
+                            except:
+                                pass
+
 
 
                             # 채널, 프로그램 체크
