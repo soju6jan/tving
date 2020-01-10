@@ -41,7 +41,7 @@ menu = {
 } 
 
 plugin_info = {
-    'version' : '0.1.1',
+    'version' : '0.2.0',
     'name' : '티빙 다운로드',
     'category_name' : 'vod',
     'icon' : '',
