@@ -100,7 +100,7 @@ class TvingAuto(object):
 
                             # qvod 패스
                             try:
-                            	if url.find('quickvod') != -1:
+                                if url.find('quickvod') != -1:
                                     if not ModelSetting.get_bool('download_qvod'):
                                         logger.debug('is qvod.. pass')
                                         episode.etc_abort = 8
