@@ -76,15 +76,15 @@ class TvingAuto(object):
                                         continue
                                 elif episode.etc_abort > 10:
                                     # 1:알수없는이유 시작실패, 2 타임오버, 3, 강제스톱.킬
-                                    # 11:제외채널, 12:제외프로그램
-                                    # 13:장르제외, 14:화이트리스트
+                                    # 12:제외채널, 13:제외프로그램
+                                    # 14:화이트리스트
                                     # 9 : retry
                                     # 8 : qvod
                                     logger.debug('ETC ABORT:%s', episode.etc_abort)
                                     continue
                                 elif episode.retry > 20:
                                     logger.debug('retry 20')
-                                    episode.etc_abort = 9
+                                    episode.etc_abort = 15
                                     continue
                             # URL때문에 DB에 있어도 다시 JSON을 받아야함.
                             json_data, url = TvingBasic.get_episode_json(code, default_quality)
@@ -98,7 +98,7 @@ class TvingAuto(object):
 
                             # qvod 패스
                             try:
-                                if len(json_data["body"]["content"]["info"]["episode"]["image"]) == 0:
+                            	if url.find('quickvod') != -1:
                                     if not ModelSetting.get_bool('download_qvod'):
                                         logger.debug('is qvod.. pass')
                                         episode.etc_abort = 8
@@ -134,6 +134,7 @@ class TvingAuto(object):
                                 if not flag_download and whitelist_first_episode_download and episode.frequency == 1:
                                     flag_download = True
                             if flag_download:
+                                episode.etc_abort = 0
                                 episode.retry += 1
                                 episode.pf = 0 # 재시도
                                 episode.save_path = save_path
@@ -185,12 +186,14 @@ class TvingAuto(object):
             query = query.filter_by(pf_abort=True)            
         elif option == 'etc_abort_under_10':
             query = query.filter(Episode.etc_abort < 10, Episode.etc_abort > 0) 
-        elif option == 'etc_abort_11':
-            query = query.filter_by(etc_abort='11')            
+        elif option == 'etc_abort_8':
+            query = query.filter_by(etc_abort='8')
         elif option == 'etc_abort_12':
             query = query.filter_by(etc_abort='12')
         elif option == 'etc_abort_13':
-            query = query.filter_by(etc_abort='13')            
+            query = query.filter_by(etc_abort='13')
+        elif option == 'etc_abort_14':
+            query = query.filter_by(etc_abort='14')
         if order == 'desc':
             query = query.order_by(desc(Episode.id))
         else:

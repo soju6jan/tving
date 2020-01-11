@@ -125,7 +125,11 @@ function make_analyse_result(data) {
   } else if (data['url_type'] == 'episode') {
     if (data.ret) {
       str = m_row_start();
-      tmp = '<img src="http://image.tving.com' + data.data.json.body.content.info.episode.image[0].url + '" class="img-fluid">'
+      if ( data.data.json.body.content.info.episode.image[0] != null) {
+        tmp = '<img src="http://image.tving.com' + data.data.json.body.content.info.episode.image[0].url + '" class="img-fluid">'
+      } else {
+        tmp = ''
+      }
       str += m_col(3, tmp)
       tmp = '<strong>' + data.data.program_name + '  ' + data.data.frequency + '회</strong><br>';
       tmp += data.data.json.body.content.info.episode.broadcast_datetime + '  ' + '<br><p>';
@@ -179,7 +183,8 @@ function make_program_page(ret) {
     str += '<hr>';
     str += '<div class="row">';
     str += '<div class="col-sm-3">'
-    str += '<img src="http://image.tving.com' + data[i].episode.image[0].url + '" class="img-fluid">'
+    if ( data[i].episode.image[0] != null)
+      str += '<img src="http://image.tving.com' + data[i].episode.image[0].url + '" class="img-fluid">'
     str += '</div>';
     str += '<div class="col-sm-9">'
     str += '<div>';

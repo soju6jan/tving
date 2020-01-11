@@ -22,7 +22,7 @@
             <option value="user_abort">사용자 중지</option>
             <option value="pf_abort">PF 중지</option>
             <option value="etc_abort_under_10">FFMPEG 에러</option>
-            <option value="etc_abort_11">패스 - QVOD</option>
+            <option value="etc_abort_8">퀵VOD</option>
             <option value="etc_abort_12">패스 - 제외 채널</option>
             <option value="etc_abort_13">패스 - 제외 프로그램</option>
             <option value="etc_abort_14">화이트리스트 제외</option>
@@ -235,7 +235,7 @@ function make_list(ret) {
     }
     tmp += '</strong>';
     tmp += ' (' + data[i].broadcast_date + ')'
-    tmp += ' ' + data[i].channel_name
+    tmp += ' ' + data[i].channel_name + ' '
     if (data[i].quality == 'stream50') {
       tmp += '1080p'
     } else if (data[i].quality == 'stream40') {

@@ -129,7 +129,11 @@ function make_program_page(ret) {
   for (i in data) {
     //m_modal(data[i])
     str += m_row_start();
-    tmp = '<img src="http://image.tving.com' + data[i].episode.image[0].url + '" class="img-fluid">'
+    if ( data[i].episode.image[0] != null) {
+      tmp = '<img src="http://image.tving.com' + data[i].episode.image[0].url + '" class="img-fluid">'
+    } else {
+      tmp = ''
+    }
     str += m_col(3, tmp)
     tmp = '<strong>' + data[i].vod_name.ko+ '</strong>';
     tmp += '<br>';

@@ -139,7 +139,7 @@ class Logic(object):
                     entity.value = value
             db.session.commit()                    
             if flag_login:
-                if LogicBasic.login():
+                if TvingBasic.login():
                     return 1
                 else: 
                     return 2
