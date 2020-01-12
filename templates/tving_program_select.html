@@ -5,6 +5,7 @@
     background-color: #ffff00;
     transition: all 0.01s ease-in-out;
   }
+  .program-item__image-tag{position:absolute;display:block;/* top:0; *//* left:0; */z-index:1;line-height:13px;background-color:#ff674b;padding:6px 12px 7px;font-size:.75rem;border-top-left-radius:.25rem;border-bottom-right-radius:.25rem;color: white;}
 </style>
 
 <ul class="nav nav-pills bg-light shadow text-dark" >
@@ -129,12 +130,19 @@ function make_program_page(ret) {
   for (i in data) {
     //m_modal(data[i])
     str += m_row_start();
+    tmp = '';
     if ( data[i].episode.image[0] != null) {
-      tmp = '<img src="http://image.tving.com' + data[i].episode.image[0].url + '" class="img-fluid">'
+      img_url = data[i].episode.image[0].url;
     } else {
-      tmp = ''
+      img_idx = data[i].program.image.findIndex((item, idx) => {
+        return item.code === 'CAIP1500';
+        //return item.code.slice(-4) === '1500';
+      });
+      img_url = data[i].program.image[img_idx].url;
+      tmp += '<span class="program-item__image-tag tag-quickup">Quick VOD</span>';
     }
-    str += m_col(3, tmp)
+    tmp += '<img src="http://image.tving.com/crop_cdn.php?u=http://image.tving.com' + img_url + '&w=210" class="img-fluid">';
+    str += m_col(3, tmp);
     tmp = '<strong>' + data[i].vod_name.ko+ '</strong>';
     tmp += '<br>';
     tmp += data[i].episode.broadcast_date + '<br><p></p>';
