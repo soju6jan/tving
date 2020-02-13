@@ -109,6 +109,8 @@ class TvingBasic(object):
             episode.channel_name = data["body"]["content"]["info"]["channel"]["name"]["ko"]
             episode.json = data
             episode.filename = Tving.get_filename(data)
+            if vod_url.find('quickvod') != -1:
+                episode.filename = episode.filename.replace('-ST.mp4', '-STQ.mp4')
             episode.vod_url = vod_url
             return episode
         except Exception as e: 
