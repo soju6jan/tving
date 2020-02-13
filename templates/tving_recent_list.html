@@ -232,7 +232,8 @@ function make_list(ret) {
       }
 
       tmp = '';
-      if ( data[i].json.body.content.info.episode.image[0] != null) {
+      //if ( data[i].json.body.content.info.episode.image[0] != null) {
+      if ( data[i].json.body.content.info.program.quickup_yn != 'Y') {
         img_url = data[i].json.body.content.info.episode.image[0].url;
       } else {
         img_idx = data[i].json.body.content.info.program.image.findIndex((item, idx) => {

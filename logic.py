@@ -58,6 +58,7 @@ class Logic(object):
         'whitelist_program' : '', 
         'whitelist_first_episode_download' : 'True',
         'download_qvod' : 'False',
+        'download_program_in_qvod' : '',
 
         'program_auto_path' : os.path.join(path_data, 'download'),
         'program_auto_make_folder' : 'True', 

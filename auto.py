@@ -40,19 +40,25 @@ class TvingAuto(object):
             retry_user_abort = ModelSetting.get_bool('retry_user_abort')
             except_channel = ModelSetting.get('except_channel')
             except_program = ModelSetting.get(key='except_program')
+            download_qvod = ModelSetting.get_bool('download_qvod')
+            download_program_in_qvod = ModelSetting.get('download_program_in_qvod')
             download_mode = ModelSetting.get(key='download_mode')
             whitelist_program = ModelSetting.get('whitelist_program')
             whitelist_first_episode_download = ModelSetting.get_bool('whitelist_first_episode_download')
 
             except_channels = [x.strip() for x in except_channel.replace('\n', ',').split(',')]
             except_programs = [x.strip().replace(' ', '') for x in except_program.replace('\n', ',').split(',')]
+            download_program_in_qvods = [x.strip().replace(' ', '') for x in download_program_in_qvod.replace('\n', ',').split(',')]
             whitelist_programs = [x.strip().replace(' ', '') for x in whitelist_program.replace('\n', ',').split(',')]
             
             except_channels = Util.get_list_except_empty(except_channels)
             except_programs = Util.get_list_except_empty(except_programs)
+            download_program_in_qvods = Util.get_list_except_empty(download_program_in_qvods)
             whitelist_programs = Util.get_list_except_empty(whitelist_programs)
             logger.debug('except_channels:%s', except_channels)
-            logger.debug('except_programs:%s', except_programs)    
+            logger.debug('except_programs:%s', except_programs)
+            logger.debug('download_qvod :%s %s', download_qvod, type(download_qvod))
+            logger.debug('download_program_in_qvods:%s', download_program_in_qvods)
             for i in range(1, page+1):
                 vod_list = Tving.get_vod_list(page=i)["body"]["result"]
                 for vod in vod_list:
@@ -98,21 +104,29 @@ class TvingAuto(object):
                             else:
                                 episode = TvingBasic.make_episode_by_json(episode, json_data, url)
 
-                            # qvod 패스
-                            try:
-                                if url.find('quickvod') != -1:
-                                    if not ModelSetting.get_bool('download_qvod'):
-                                        logger.debug('is qvod.. pass')
-                                        episode.etc_abort = 8
-                                        db.session.commit()
-                                        continue
-                            except:
-                                pass
-
-
-
+                            # qvod 체크
+                            is_qvod = False
+                            if url.find('quickvod') != -1:
+                                is_qvod = True
+                            
                             # 채널, 프로그램 체크
                             flag_download = True
+                            if is_qvod:
+                                if not download_qvod:
+                                    flag_download = False
+                                    for program_name in download_program_in_qvods:
+                                        if episode.program_name.replace(' ', '').find(program_name) != -1:
+                                            episode.etc_abort = 0
+                                            flag_download = True
+                                            logger.debug('is qvod.. %s %s', program_name, flag_download)
+                                            break
+                                    
+                                    if not flag_download:
+                                        episode.etc_abort = 8
+                                        db.session.commit()
+                                        logger.debug('is qvod.. pass')
+                                        continue
+
                             if download_mode == '0':
                                 for program_name in except_programs:
                                     if episode.program_name.replace(' ', '').find(program_name) != -1:
