@@ -301,9 +301,9 @@ def ajax(sub):
 def api(sub):
     if sub == 'decrypt':
         try: 
-            import system
             sjva_token = request.args.get('sjva_token')
-            if sjva_token != system.SystemLogic.get_setting_value('unique'):
+            from system.model import ModelSetting as SystemModelSetting
+            if sjva_token != SystemModelSetting.get('unique'):
                 return "wrong_sjva_token"
             code = request.args.get('c')
             quality = request.args.get('q')
