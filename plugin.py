@@ -172,6 +172,7 @@ def second_menu(sub, sub2):
 # For UI                                                            
 #########################################################
 @blueprint.route('/ajax/<sub>', methods=['GET', 'POST'])
+@login_required
 def ajax(sub):
     logger.debug('TVING AJAX sub:%s', sub)
     try:     
@@ -301,10 +302,10 @@ def ajax(sub):
 def api(sub):
     if sub == 'decrypt':
         try: 
-            sjva_token = request.args.get('sjva_token')
-            from system.model import ModelSetting as SystemModelSetting
-            if sjva_token != SystemModelSetting.get('unique'):
-                return "wrong_sjva_token"
+            #sjva_token = request.args.get('sjva_token')
+            #from system.model import ModelSetting as SystemModelSetting
+            #if sjva_token != SystemModelSetting.get('unique'):
+            #    return "wrong_sjva_token"
             code = request.args.get('c')
             quality = request.args.get('q')
             token = request.args.get('t')
