@@ -233,7 +233,7 @@ function make_list(ret) {
 
       tmp = '';
       //if ( data[i].json.body.content.info.episode.image[0] != null) {
-      if ( data[i].json.body.content.info.program.quickup_yn != 'Y') {
+      if ( data[i].json.body.content.info.program.quickup_yn != 'Y' && data[i].json.body.content.info.episode.image[0] != null) {
         img_url = data[i].json.body.content.info.episode.image[0].url;
       } else {
         img_idx = data[i].json.body.content.info.program.image.findIndex((item, idx) => {
