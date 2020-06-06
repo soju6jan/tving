@@ -302,24 +302,15 @@ def ajax(sub):
 def api(sub):
     if sub == 'decrypt':
         try: 
-            #sjva_token = request.args.get('sjva_token')
-            #from system.model import ModelSetting as SystemModelSetting
-            #if sjva_token != SystemModelSetting.get('unique'):
-            #    return "wrong_sjva_token"
             code = request.args.get('c')
             quality = request.args.get('q')
             token = request.args.get('t')
-            logger.debug(token)
-            #logger.debug(token)
             token = '_tving_token=%s' % urllib.quote(token)
             logger.debug(token)
-            use_proxy = ModelSetting.get('use_proxy')
-            proxy_url = ModelSetting.get('proxy_url')
-            #logger.debug('get_episode_json %s %s', use_proxy, proxy_url)
-            if use_proxy == 'True':
-                ret =  Tving.get_episode_json_proxy(code, quality, proxy_url, token=token)
-            else:
-                ret = Tving.get_episode_json_default(code, quality, token=token)
+            proxy = None
+            if ModelSetting.get_bool('use_proxy'):
+                proxy = ModelSetting.get('proxy_url')
+            ret = Tving.get_episode_json(code, quality, token, proxy=proxy)
             return ret[1]
         except Exception as e: 
             logger.error('Exception:%s', e)

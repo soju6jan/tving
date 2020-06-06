@@ -161,12 +161,11 @@ class TvingBasic(object):
                 data = Tving.get_vod_list(Tving.config['program_param'] % code, page=1)
                 return {'url_type': url_type, 'page':'1', 'code':code, 'data' : data}
             elif url_type == 'movie':
-                proxy_url = ModelSetting.get('proxy_url') if ModelSetting.get_bool('use_proxy') else None
-                data = Tving.get_movie_json(code, ModelSetting.get('device_id'), proxy_url, ModelSetting.get('token'))
-
-                
+                proxy = None
+                if ModelSetting.get_bool('use_proxy'):
+                    proxy = ModelSetting.get('proxy_url')
+                data = Tving.get_movie_json(code, ModelSetting.get('device_id'), ModelSetting.get('token'), proxy=proxy)
                 return {'url_type': url_type, 'page':'1', 'code':code, 'data' : data}
-
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())        
@@ -218,15 +217,10 @@ class TvingBasic(object):
     @staticmethod
     def get_episode_json(code, quality):
         try:
-            use_proxy = ModelSetting.get('use_proxy')
-            proxy_url = ModelSetting.get('proxy_url')
-            token = ModelSetting.get('token')
-            #logger.debug('get_episode_json %s %s', use_proxy, proxy_url)
-            if use_proxy == 'True':
-                ret =  Tving.get_episode_json_proxy(code, quality, proxy_url, token=token)
-            else:
-                ret = Tving.get_episode_json_default(code, quality, token=token)
-            #logger.debug(ret)
+            proxy = None
+            if ModelSetting.get_bool('use_proxy'):
+                proxy = ModelSetting.get('proxy_url')
+            ret = Tving.get_episode_json(code, quality, ModelSetting.get('token'), proxy=proxy)
             return ret
         except Exception as e: 
             logger.error('Exception:%s', e)

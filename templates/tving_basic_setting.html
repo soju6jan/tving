@@ -15,7 +15,7 @@
   {{ macros.setting_input_text('save_path', '저장 폴더', value=arg['save_path'], desc='정상적으로 완료된 파일이 이동할 폴더 입니다. ') }}
   {{ macros.setting_input_int('max_pf_count', '허용 Packet Fail 수', value=arg['max_pf_count'], min='0', desc=['이 값보다 Packet Fail 횟수가 더 많으면 실패처리 합니다.', '0 : Packet Fail이 발생하면 바로 실패처리.', '-1 : 실패처리 하지 않음.']) }}
   {{ macros.setting_checkbox('use_proxy', 'Proxy 사용', value=arg['use_proxy'], desc='VPS 등 IP 차단된 곳에서 사용할 경우 Proxy사용') }}
-  {{ macros.setting_input_text_and_buttons('proxy_url', 'Proxy URL',[['proxy_php_download_btn', 'Proxy용 PHP 파일 다운로드']], value=arg['proxy_url'], desc='sjva_tving.php 파일 URL') }}
+  {{ macros.setting_input_text('proxy_url', 'Proxy URL', value=arg['proxy_url'], desc=None) }}
   {{ macros.setting_input_text('device_id', 'Device ID', value=arg['device_id'], desc='') }}
   {{ macros.setting_button([['setting_save_btn', '저장']]) }}
   </form>
@@ -72,11 +72,6 @@ $("#login").click(function(e) {
       $("#large_modal").modal();
     }
   });
-});
-
-$("#proxy_php_download_btn").click(function(e) {
-  e.preventDefault();
-  window.location.href='/download_file/static/file/sjva_tving.php';
 });
 
 </script>    
