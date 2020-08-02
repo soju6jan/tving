@@ -120,7 +120,7 @@ class Logic(object):
     @staticmethod
     def scheduler_stop():
         try:
-            scheduler.remove_job(package_name)
+            scheduler.remove_job('%s_recent' % package_name)
         except Exception as e:
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
