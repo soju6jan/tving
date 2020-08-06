@@ -67,7 +67,8 @@ class TvingAuto(object):
                             logger.debug('not in scheduler')
                             return
                         code = vod["episode"]["code"]
-                        with db.session.no_autoflush:
+                        #with db.session.no_autoflush:
+                        if True:
                             # 2019-01-11 720권한만 있을 때 1080p를 받으려고 하면 계속 episode를 생성
                             #episode = db.session.query(Episode).filter_by(episode_code=code, quality=default_quality).with_for_update().first() 
                             #episode = db.session.query(Episode).filter_by(episode_code=code).with_for_update().first()
