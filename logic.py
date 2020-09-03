@@ -63,6 +63,7 @@ class Logic(object):
         'program_auto_path' : os.path.join(path_data, 'download'),
         'program_auto_make_folder' : 'True', 
         'program_auto_count_ffmpeg' : '4', 
+        'poster_view': '0',
     }
     
 

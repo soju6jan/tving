@@ -48,6 +48,7 @@
 <script type="text/javascript">
 var current_data = null;
 var package_name = 'tving';
+var poster_view = '{{arg['poster_view']}}';
 
 $(document).ready(function(){
   $.ajax({
@@ -232,20 +233,31 @@ function make_list(ret) {
       }
 
       tmp = '';
-      //if ( data[i].json.body.content.info.episode.image[0] != null) {
-      if ( data[i].json.body.content.info.program.quickup_yn != 'Y' && data[i].json.body.content.info.episode.image[0] != null) {
-        img_url = data[i].json.body.content.info.episode.image[0].url;
-      } else {
+      if (poster_view == '0' || poster_view == '1') {
         img_idx = data[i].json.body.content.info.program.image.findIndex((item, idx) => {
           return item.code === 'CAIP1500';
-          //return item.code.slice(-4) === '1500';
         });
         img_url = data[i].json.body.content.info.program.image[img_idx].url;
-        tmp += '<span class="program-item__image-tag tag-quickup">Quick VOD</span>';
+        if (data[i].json.body.content.info.program.quickup_yn != 'Y' && data[i].json.body.content.info.episode.image[0] != null && poster_view == '0') {
+          img_url = data[i].json.body.content.info.episode.image[0].url;
+        }
+        if (data[i].json.body.content.info.program.quickup_yn == 'Y') {
+          tmp += '<span class="program-item__image-tag tag-quickup">Quick VOD</span>';
+        }
+        tmp += '<img src="http://image.tving.com/crop_cdn.php?u=http://image.tving.com' + img_url + '&w=210" class="rounded img-fluid">';
+        str += m_col(3, tmp);
+      } else {
+        img_idx = data[i].json.body.content.info.program.image.findIndex((item, idx) => {
+          return item.code === 'CAIP0900';
+        });
+        img_url = data[i].json.body.content.info.program.image[img_idx].url;
+        if (data[i].json.body.content.info.program.quickup_yn == 'Y') {
+          tmp += '<span class="program-item__image-tag tag-quickup">QVOD</span>';
+        }
+        tmp += '<img src="http://image.tving.com' + img_url + '/dims/resize/236" class="rounded img-fluid">';
+        str += m_col(2, tmp);
       }
-      tmp += '<img src="http://image.tving.com/crop_cdn.php?u=http://image.tving.com' + img_url + '&w=210" class="img-fluid">';
     }
-    str += m_col(3, tmp)
 
     tmp = '<strong>' + data[i].program_name + '  ' 
     if (data[i].frequency != '') {
