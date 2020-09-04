@@ -129,6 +129,7 @@ def second_menu(sub, sub2):
         elif sub2 == 'list':
             try:
                 arg = {}
+                arg['poster_view'] = ModelSetting.get('poster_view')
                 return render_template('%s_%s_%s.html' % (package_name, sub, sub2), arg=arg)
             except Exception as e: 
                 logger.error('Exception:%s', e)
