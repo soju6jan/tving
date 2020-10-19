@@ -68,7 +68,8 @@ $("#login").click(function(e) {
     dataType: "json",
     success: function (list) {
       document.getElementById("modal_title").innerHTML = "Login Result";
-      document.getElementById("modal_body").innerHTML = "<pre>"+JSON.stringify(list, null, 2) + "</pre>";
+      //document.getElementById("modal_body").innerHTML = "<pre>"+JSON.stringify(list, null, 2) + "</pre>";
+      document.getElementById("modal_body").innerHTML = "<pre>"+list + "</pre>";
       $("#large_modal").modal();
     }
   });
