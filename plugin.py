@@ -4,7 +4,6 @@
 import os
 import traceback
 import logging
-import urllib
 import json
 
 # third-party
@@ -15,7 +14,7 @@ from flask_socketio import SocketIO, emit, send
 
 # sjva 공용
 from framework.logger import get_logger
-from framework import app, db, scheduler, socketio
+from framework import app, db, scheduler, socketio, py_urllib
 from framework.util import Util, AlchemyEncoder
 
 # 로그
@@ -34,9 +33,9 @@ from .logic_program import TvingProgram, TvingProgramEntity
 
 blueprint = Blueprint(package_name, package_name, url_prefix='/%s' %  package_name, template_folder=os.path.join(os.path.dirname(__file__), 'templates'))
 menu = {
-    'main' : [package_name, '티빙'],
+    'main' : [package_name, u'티빙'],
     'sub' : [
-        ['basic', '기본'], ['recent', '최근방송 자동'], ['program', '프로그램별 자동'], ['log', '로그']
+        ['basic', u'기본'], ['recent', u'최근방송 자동'], ['program', u'프로그램별 자동'], ['log', u'로그']
     ]
 } 
 
@@ -306,7 +305,7 @@ def api(sub):
             code = request.args.get('c')
             quality = request.args.get('q')
             token = request.args.get('t')
-            token = '_tving_token=%s' % urllib.quote(token)
+            token = '_tving_token=%s' % py_urllib.quote(token)
             logger.debug(token)
             proxy = None
             if ModelSetting.get_bool('use_proxy'):
