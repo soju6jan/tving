@@ -306,11 +306,7 @@ def api(sub):
             quality = request.args.get('q')
             token = request.args.get('t')
             token = '_tving_token=%s' % py_urllib.quote(token)
-            logger.debug(token)
-            proxy = None
-            if ModelSetting.get_bool('use_proxy'):
-                proxy = ModelSetting.get('proxy_url')
-            ret = Tving.get_episode_json(code, quality, token, proxy=proxy)
+            ret = Tving.get_episode_json(code, quality)
             return ret[1]
         except Exception as e: 
             logger.error('Exception:%s', e)

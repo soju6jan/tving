@@ -8,15 +8,9 @@
 
 <div>
   <form id="setting">
-  {{ macros.setting_radio('login_type', '로그인 타입', ['CJONE', 'TVING'], value=arg['login_type']) }}
-  {{ macros.setting_input_text('id', 'ID', value=arg['id'], col='3') }}
-  {{ macros.setting_input_text_and_buttons('pw', '암호', [['login', '확인']], value=arg['pw'], col='4', type='password') }}
   {{ macros.setting_select('quality', '기본 화질', [['FHD', 'FHD'], ['HD', 'HD'], ['SD', 'SD']], col='3', value=arg['quality']) }}
   {{ macros.setting_input_text('save_path', '저장 폴더', value=arg['save_path'], desc='정상적으로 완료된 파일이 이동할 폴더 입니다. ') }}
   {{ macros.setting_input_int('max_pf_count', '허용 Packet Fail 수', value=arg['max_pf_count'], min='0', desc=['이 값보다 Packet Fail 횟수가 더 많으면 실패처리 합니다.', '0 : Packet Fail이 발생하면 바로 실패처리.', '-1 : 실패처리 하지 않음.']) }}
-  {{ macros.setting_checkbox('use_proxy', 'Proxy 사용', value=arg['use_proxy'], desc='VPS 등 IP 차단된 곳에서 사용할 경우 Proxy사용') }}
-  {{ macros.setting_input_text('proxy_url', 'Proxy URL', value=arg['proxy_url'], desc=None) }}
-  {{ macros.setting_input_text('device_id', 'Device ID', value=arg['device_id'], desc='') }}
   {{ macros.setting_button([['setting_save_btn', '저장']]) }}
   </form>
 </div> <!--전체-->

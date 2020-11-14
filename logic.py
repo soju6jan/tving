@@ -34,16 +34,9 @@ from .auto import TvingAuto
         
 class Logic(object):
     db_default = { 
-        'id' : '', 
-        'pw' : '', 
-        'token' : '',
         'quality' : 'FHD',
         'save_path' : os.path.join(path_data, 'download'),
         'max_pf_count' : '0',
-        'login_type' : '0', 
-        'use_proxy' : 'False',
-        'proxy_url' : '',
-        'device_id' : '',
         'recent_code' : '',
 
         'auto_interval' : '10', 

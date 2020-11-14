@@ -161,10 +161,7 @@ class TvingBasic(object):
                 data = Tving.get_vod_list(Tving.config['program_param'] % code, page=1)
                 return {'url_type': url_type, 'page':'1', 'code':code, 'data' : data}
             elif url_type == 'movie':
-                proxy = None
-                if ModelSetting.get_bool('use_proxy'):
-                    proxy = ModelSetting.get('proxy_url')
-                data = Tving.get_movie_json(code, ModelSetting.get('device_id'), ModelSetting.get('token'), proxy=proxy)
+                data = Tving.get_movie_json(code)
                 return {'url_type': url_type, 'page':'1', 'code':code, 'data' : data}
         except Exception as e: 
             logger.error('Exception:%s', e)
@@ -217,10 +214,7 @@ class TvingBasic(object):
     @staticmethod
     def get_episode_json(code, quality):
         try:
-            proxy = None
-            if ModelSetting.get_bool('use_proxy'):
-                proxy = ModelSetting.get('proxy_url')
-            ret = Tving.get_episode_json(code, quality, ModelSetting.get('token'), proxy=proxy)
+            ret = Tving.get_episode_json(code, quality)
             return ret
         except Exception as e: 
             logger.error('Exception:%s', e)
