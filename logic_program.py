@@ -254,7 +254,7 @@ class TvingProgram(object):
         entity.ffmpeg_status_kor = str(arg['status'])
         entity.ffmpeg_percent = arg['data']['percent']
 
-        import plugin
+        from . import plugin
         arg['status'] = str(arg['status'])
         plugin.socketio_callback('status', arg)
     
