@@ -195,7 +195,8 @@ class TvingAuto(object):
         #query = Episode.query.filter_by(call='auto')
         query = Episode.query.filter((Episode.call == 'auto') | (Episode.call == None))
         if program is not None:
-            query = query.filter(Episode.program_name.like('%'+program+'%'))
+            #query = query.filter(Episode.program_name.like('%'+program+'%'))
+            query = query.filter(or_(Episode.program_name.like('%'+program+'%'), Episode.channel_name.like('%'+program+'%')))
         if option == 'completed':
             query = query.filter_by(completed=True)
         elif option == 'uncompleted':
