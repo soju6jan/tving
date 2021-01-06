@@ -22,7 +22,7 @@ from .plugin import logger, package_name
 import framework.tving.api as Tving
 from .model import ModelSetting, Episode
 from .basic import TvingBasic
-import plugin
+
 
 #########################################################
 
@@ -111,6 +111,7 @@ class TvingProgram(object):
 
     @staticmethod
     def download_thread_function():
+        from . import plugin
         while True:
         #while self.flag_stop == False:
             try:
@@ -260,6 +261,7 @@ class TvingProgram(object):
     
     @staticmethod
     def program_auto_command(req):
+        from . import plugin
         try:
             command = req.form['command']
             entity_id = int(req.form['entity_id'])
