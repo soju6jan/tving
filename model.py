@@ -19,7 +19,7 @@ from .plugin import logger, package_name
 db_file = os.path.join(path_app_root, 'data', 'db', '%s.db' % package_name)
 app.config['SQLALCHEMY_BINDS'][package_name] = 'sqlite:///%s' % (db_file)
 
-ModelSetting = get_model_setting(package_name, logger)
+ModelSetting = get_model_setting(package_name, logger, table_name = 'plugin_%s_setting' % package_name)
 
 #########################################################
 
