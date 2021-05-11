@@ -124,39 +124,33 @@ class TvingBasic(object):
             logger.debug('analyze :%s', url)
             url_type = None
             code = None
-            if url.startswith('http'):
-                match = re.compile(r'player\/(?P<code>E\d+)').search(url)
-                if match:
+            match = re.compile(r'(?P<code>[EMP]\d+)').search(url)
+            if match:
+                code = match.group('code')
+                if code.startswith('E'):
                     url_type = 'episode'
-                    code = match.group('code')
-            else:
-                if url.startswith('E'):
-                    url_type = 'episode'
-                    code = url
-                elif url.startswith('P'):
+                elif code.startswith('P'):
                     url_type = 'program'
-                    code = url.strip()
-                elif url.startswith('M'):
+                elif code.startswith('M'):
                     url_type = 'movie'
-                    code = url.strip()
-                else:
-                    pass
             logger.debug('Analyze %s %s', url_type, code)
-            ModelSetting.set('recent_code', code)
             if url_type is None:
                 return {'url_type':'None'}
             elif url_type == 'episode':
                 quality = ModelSetting.get('quality')
-                quality = Tving.get_quality_to_tving(quality)
-                data, vod_url = TvingBasic.get_episode_json(code, quality)
+                quality = Tving.get_quality_to_tving(quality)                
+                try:
+                    data, vod_url = TvingBasic.get_episode_json(code, quality)
+                except TypeError as e:
+                    data, vod_url = None, None
                 logger.debug(vod_url)
                 if data is not None:
                     episode = Episode('basic')
                     episode = TvingBasic.make_episode_by_json(episode, data, vod_url)
                     TvingBasic.current_episode = episode
-                    return {'url_type': url_type, 'ret' : True, 'data' : episode.as_dict()}
+                    return {'url_type': url_type, 'ret' : True, 'code': code, 'data' : episode.as_dict()}
                 else:
-                    return {'url_type': url_type, 'ret' : False, 'data' : data}
+                    return {'url_type': url_type, 'ret' : False, 'data' : {'message': '에피소드 정보를 얻지 못함'}}
             elif url_type == 'program':
                 data = Tving.get_vod_list(Tving.config['program_param'] % code, page=1)
                 return {'url_type': url_type, 'page':'1', 'code':code, 'data' : data}
