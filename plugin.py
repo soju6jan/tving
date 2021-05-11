@@ -195,7 +195,9 @@ def ajax(sub):
         elif sub == 'analyze':
             url = request.form['url']
             ret = TvingBasic.analyze(url)
-            TvingProgram.recent_code = url
+            if 'code' in ret:
+                ModelSetting.set('recent_code', ret['code'])
+                TvingProgram.recent_code = url
             return jsonify(ret)
         elif sub == 'program_page':
             code = request.form['code']

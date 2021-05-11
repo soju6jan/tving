@@ -61,7 +61,7 @@ class TvingAuto(object):
             logger.debug('download_program_in_qvods:%s', download_program_in_qvods)
             for i in range(1, page+1):
                 vod_list = Tving.get_vod_list(page=i)["body"]["result"]
-                for vod in vod_list:
+                for vod in [x for x in vod_list if x['episode']['drm_yn'].lower() != 'y']:
                     try:
                         if not scheduler.is_include('tving_recent'):
                             logger.debug('not in scheduler')
