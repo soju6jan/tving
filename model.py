@@ -11,7 +11,7 @@ from datetime import datetime
 # sjva 공용
 from framework import db, app, path_app_root
 from framework.util import Util
-from framework.common.plugin import get_model_setting, Logic, default_route
+from plugin import get_model_setting, Logic, default_route
 
 # 패키지
 from .plugin import logger, package_name
