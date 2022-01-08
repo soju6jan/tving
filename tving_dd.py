@@ -18,6 +18,7 @@ class TvingDD:
                 'license_headers' : data['play_info']['drm_key_request_properties'],
                 'license_url' : data['play_info']['drm_license_uri'],
                 'folder_tmp' : os.path.join(path_data, 'tmp'),
+                'clean' : False
             })
             ret = downloader.download()
             return ret

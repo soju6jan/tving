@@ -12,7 +12,7 @@ from sqlalchemy import desc, or_
 
 # sjva 공용
 from framework.logger import get_logger
-from framework import app, db, scheduler, path_data
+from framework import app, db, scheduler, path_data, SystemModelSetting
 from framework.job import Job
 from framework.util import Util
 
@@ -59,9 +59,12 @@ class TvingAuto(object):
             logger.debug('except_programs:%s', except_programs)
             logger.debug('download_qvod :%s %s', download_qvod, type(download_qvod))
             logger.debug('download_program_in_qvods:%s', download_program_in_qvods)
+            from support.site.tving import SupportTving
+            support_tving = SupportTving(token=SystemModelSetting.get('site_tving_token').split('=')[1], proxy=Tving.get_proxy(), deviceid=SystemModelSetting.get('site_tving_deviceid'))
             for i in range(1, page+1):
                 vod_list = Tving.get_vod_list(page=i)["body"]["result"]
-                for vod in [x for x in vod_list if x['episode']['drm_yn'].lower() != 'y']:
+                #for vod in [x for x in vod_list if x['episode']['drm_yn'].lower() != 'y']:
+                for vod in vod_list:
                     try:
                         if not scheduler.is_include('tving_recent'):
                             logger.debug('not in scheduler')
@@ -99,9 +102,14 @@ class TvingAuto(object):
                                     episode.etc_abort = 15
                                     continue
                             # URL때문에 DB에 있어도 다시 JSON을 받아야함.
-                            json_data, url = TvingBasic.get_episode_json(code, default_quality)
+                            #json_data, url = TvingBasic.get_episode_json(code, default_quality)
+                            json_data = support_tving.get_stream_info(code, default_quality)
+                            if json_data['body']['drm']:
+                                url = json_data['body']['play_info']['uri']
+                            else:
+                                url = json_data['body']['broad_url']
                             if episode is None:
-                                logger.debug('EPISODE is none')
+                                #slogger.debug('EPISODE is none')
                                 episode = Episode('auto')
                                 episode = TvingBasic.make_episode_by_json(episode, json_data, url)
                                 db.session.add(episode)
@@ -164,13 +172,26 @@ class TvingAuto(object):
                                 db.session.commit()
                                 time.sleep(2)
                                 continue
+                            if json_data['body']['drm'] == False:
+                                logger.debug('FFMPEG Start.. id:%s', episode.id)
+                                if episode.id is None:
+                                    logger.debug('PROGRAM:%s', episode.program_name)
+                                
+                                f = ffmpeg.Ffmpeg(url, episode.filename, plugin_id=episode.id, listener=TvingBasic.ffmpeg_listener, max_pf_count=max_pf_count, call_plugin='%s_recent' % package_name, save_path=save_path)
+                                f.start_and_wait()
+                            else:
+                                from .tving_dd import TvingDD
+                                json_data['body']['save_path'] = save_path
+                                ret = TvingDD.download(json_data['body'])
+                                if ret:
+                                    episode.completed = True
+                                    episode.end_time = datetime.now()
+                                    episode.download_time = (episode.end_time - episode.start_time).seconds
+                                else:
+                                    episode.etc_abort = 16
+                                db.session.commit()
 
-                            logger.debug('FFMPEG Start.. id:%s', episode.id)
-                            if episode.id is None:
-                                logger.debug('PROGRAM:%s', episode.program_name)
-                            
-                            f = ffmpeg.Ffmpeg(url, episode.filename, plugin_id=episode.id, listener=TvingBasic.ffmpeg_listener, max_pf_count=max_pf_count, call_plugin='%s_recent' % package_name, save_path=save_path)
-                            f.start_and_wait()
+
                     except Exception as e: 
                         logger.error('Exception:%s', e)
                         logger.error(traceback.format_exc())
