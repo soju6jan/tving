@@ -131,7 +131,7 @@ class TvingProgram(object):
                 #self.current_scan_entity.scan_start_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 #Log('* 스캔 큐 scan_start_time : %s', self.current_scan_entity.scan_start_time)
                 data = TvingBasic.get_episode_json(entity.episode_code, entity.quality)
-                vod_url = data['play_info']['url']
+                vod_url = data['url']
                 #logger.debug(data)
         
                 episode = Episode('basic')

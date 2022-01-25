@@ -171,7 +171,7 @@ function make_analyse_result(data) {
         if (data.data.drm) {
           tmp2 = m_button('drm_download', 'DRM 다운로드', [{'key':'filename', 'value':data.data.filename}, {'key':'code', 'value':data.code}])
         } else {
-          tmp2 = m_button('episode_download_start', '다운로드', [{'key':'filename', 'value':data.data.filename}, {'key':'url', 'value':data.data.play_info.url}])
+          tmp2 = m_button('episode_download_start', '다운로드', [{'key':'filename', 'value':data.data.filename}, {'key':'url', 'value':data.data.url}])
         }
       }
       tmp2 += m_button('program_search', '프로그램 검색', [{'key':'program', 'value':data.data.content.program_code}])
@@ -203,7 +203,7 @@ function make_analyse_result(data) {
       if (data.data.drm) {
         tmp2 = m_button('drm_download', 'DRM 다운로드', [{'key':'filename', 'value':data.data.filename}, {'key':'code', 'value':data.code}])
       } else {
-        tmp2 = m_button('movie_download', '다운로드', [{'key':'filename', 'value':data.data.filename}, {'key':'url', 'value':data.data.play_info.url}])
+        tmp2 = m_button('movie_download', '다운로드', [{'key':'filename', 'value':data.data.filename}, {'key':'url', 'value':data.data.url}])
       }
       tmp += m_button_group(tmp2);
     } else {

@@ -101,7 +101,7 @@ class TvingAuto(object):
                             # URL때문에 DB에 있어도 다시 JSON을 받아야함.
                             #json_data, url = TvingBasic.get_episode_json(code, default_quality)
                             json_data = SupportTving.ins.get_info(code, default_quality)
-                            url = json_data['play_info']['url']
+                            url = json_data['url']
                             if episode is None:
                                 #slogger.debug('EPISODE is none')
                                 episode = Episode('auto')

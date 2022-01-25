@@ -121,7 +121,7 @@ class TvingBasic(object):
                 return {'url_type':'None'}
             elif url_type == 'episode':
                 data = TvingBasic.get_episode_json(code)
-                vod_url = data['play_info']['url'] 
+                vod_url = data['url'] 
                 logger.debug(vod_url)
                 if data is not None:
                     episode = Episode('basic')
