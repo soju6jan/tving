@@ -120,8 +120,33 @@ $("body").on('click', '#program_search', function(e){
 });
 
 
+$("body").on('click', '#drm_download', function(e){
+  e.preventDefault();
+  code = $(this).data('code');
+  window.open("/terminal", "_blank");
+  $.ajax({
+    url: '/' + package_name + '/ajax/drm_download',
+    type: "POST", 
+    cache: false,
+    data: {code:code},
+    dataType: "json",
+    success: function (data) {
+      if (data.ret == 'success') {
+        $.notify('<strong>터미널 창에서 다운로드를 시작합니다.</strong>', {
+          type: 'success'
+        });
+      }
+    }
+  });
+});
+
+
+
+
+
 
 function make_analyse_result(data) {
+  console.log(data);
   if (data['url_type'] == 'None') {
     $.notify('<strong>유효한 값이 아닙니다.</strong>', {
       type: 'warning'
@@ -129,20 +154,22 @@ function make_analyse_result(data) {
   } else if (data['url_type'] == 'episode') {
     if (data.ret) {
       str = m_row_start();
-      if ( data.data.json.body.content.info.episode.image[0] != null) {
-        tmp = '<img src="http://image.tving.com' + data.data.json.body.content.info.episode.image[0].url + '" class="img-fluid">'
+      if ( data.data.content.info.episode.image[0] != null) {
+        tmp = '<img src="http://image.tving.com' + data.data.content.info.episode.image[0].url + '" class="img-fluid">'
       } else {
         tmp = ''
       }
       str += m_col(3, tmp)
-      tmp = '<strong>' + data.data.program_name + '  ' + data.data.frequency + '회</strong><br>';
-      tmp += data.data.json.body.content.info.episode.broadcast_datetime + '  ' + '<br><p>';
-      if ( data.data.json.body.content.info.episode.synopsis.ko != null)
-        tmp += '<p>' + data.data.json.body.content.info.episode.synopsis.ko.replace('\n', '<br>') + '<p>';
-      tmp += '파일명 : ' + data.data.filename;
-
-      tmp2 = m_button('episode_download_start', '다운로드', [{'key':'filename', 'value':data.data.filename}, {'key':'url', 'value':data.data.vod_url}])
-      tmp2 += m_button('program_search', '프로그램 검색', [{'key':'program', 'value':data.data.program_code}])
+      tmp = '<strong>' + data.data.content.program_name + '  ' + data.data.content.frequency + '회</strong><br>';
+      tmp += data.data.content.info.episode.broadcast_datetime + '  ' + '<br><p>';
+      if ( data.data.content.info.episode.synopsis.ko != null)
+        tmp += '<p>' + data.data.content.info.episode.synopsis.ko.replace('\n', '<br>') + '<p>';
+      tmp += '파일명 : ' + data.data.filename + '<br>';
+      tmp += 'DRM : ' + data.data.play_info.drm;
+      tmp2 = '';
+      if (data.data.avaliable)
+        tmp2 = m_button('episode_download_start', '다운로드', [{'key':'filename', 'value':data.data.filename}, {'key':'url', 'value':data.data.play_info.url}])
+      tmp2 += m_button('program_search', '프로그램 검색', [{'key':'program', 'value':data.data.content.program_code}])
       tmp += m_button_group(tmp2)
       str += m_col(9, tmp)
       str += m_row_end();
@@ -158,11 +185,26 @@ function make_analyse_result(data) {
   } else if (data['url_type'] == 'movie') {
     //console.log(data)
     str = m_row_start();
-    tmp = '<img src="' + data.data.body.content.info.movie.stcut_master_img + '" class="img-fluid">'
+    tmp = '<img src="' + data.data.content.info.movie.stcut_master_img + '" class="img-fluid">'
     str += m_col(3, tmp)
-    tmp = '<strong>' + data.data.body.content.info.movie.name.ko+'</strong><br><br>';
-    if ( data.data.body.content.info.movie.story.ko != null)
-      tmp += '<p>' + data.data.body.content.info.movie.story.ko.replace('\n', '<br>') + '<p>';
+    tmp = '<strong>' + data.data.content.info.movie.name.ko+'</strong><br><br>';
+    if ( data.data.content.info.movie.story.ko != null)
+      tmp += '<p>' + data.data.content.info.movie.story.ko.replace('\n', '<br>') + '<p>';
+    
+    if (data.data.avaliable) {
+      tmp += '파일명 : ' + data.data.filename + '<br>';
+      tmp += 'DRM : ' + data.data.play_info.drm;
+
+      if (data.data.play_info.drm) {
+        tmp2 = m_button('drm_download', 'DRM 다운로드', [{'key':'filename', 'value':data.data.filename}, {'key':'code', 'value':data.code}])
+      } else {
+        tmp2 = m_button('movie_download', '다운로드', [{'key':'filename', 'value':data.data.filename}, {'key':'url', 'value':data.data.play_info.url}])
+      }
+      tmp += m_button_group(tmp2);
+    } else {
+      tmp += "권한없음 (Device ID 오류 or 이용권 제한 or 개별구매 필요)<br>";  
+    }
+    /*
     if (data.data.ret.ret == 'no_4k') {
       tmp += '4K 영상 없음<br>';  
     } else if (data.data.ret.ret == 'need_pay') {
@@ -172,6 +214,7 @@ function make_analyse_result(data) {
       tmp2 = m_button('movie_download', '다운로드', [{'key':'filename', 'value':data.data.ret.filename}, {'key':'url', 'value':data.data.ret.decrypted_url}])
       tmp += m_button_group(tmp2)
     }
+    */
     str += m_col(9, tmp)
     str += m_row_end();
     document.getElementById("detail").innerHTML = str;
@@ -181,7 +224,7 @@ function make_analyse_result(data) {
 
 
 function make_program_page(ret) {
-  data = ret.data.body.result
+  data = ret.data.result
   str = '';
   for (i in data) {
     str += '<hr>';
@@ -219,7 +262,7 @@ function make_program_page(ret) {
     document.getElementById("detail").innerHTML += str;
   }
   
-  if (ret.data.body.has_more == 'Y') {
+  if (ret.data.has_more == 'Y') {
     str = '<div class="d-inline-block"></div><form>';
     str += '<button id="more_btn" class="btn btn-outline-secondary btn-lg btn-block" type="button" data-code="'+ret.code+'" data-page="'+ret.page+'">More</button>'
     str += '</form>';

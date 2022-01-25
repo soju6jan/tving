@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #########################################################
 # python
-import os
+import os, time
 import traceback
 import logging
 import json
@@ -14,7 +14,7 @@ from flask_socketio import SocketIO, emit, send
 
 # sjva 공용
 from framework.logger import get_logger
-from framework import app, db, scheduler, socketio, py_urllib
+from framework import app, db, scheduler, socketio, py_urllib, path_app_root, path_data
 from framework.util import Util, AlchemyEncoder
 
 # 로그
@@ -22,7 +22,6 @@ package_name = __name__.split('.')[0]
 logger = get_logger(package_name)
 
 # 패키지
-import framework.tving.api as Tving
 from .logic import Logic
 from .basic import TvingBasic
 from .auto import TvingAuto
@@ -184,14 +183,6 @@ def ajax(sub):
                 logger.error('Exception:%s', e)
                 logger.error(traceback.format_exc())
                 return jsonify('fail')
-        elif sub == 'login':
-            try:
-                ret = Tving.do_login(request.form['id'], request.form['pw'], request.form['login_type'] )
-                return jsonify(ret)
-            except Exception as e: 
-                logger.error('Exception:%s', e)
-                logger.error(traceback.format_exc())
-                return jsonify('fail')
         elif sub == 'analyze':
             url = request.form['url']
             ret = TvingBasic.analyze(url)
@@ -217,6 +208,31 @@ def ajax(sub):
                 filename = request.form['filename']
                 ret = TvingBasic.movie_download(url, filename)
                 return jsonify(ret)
+            except Exception as e: 
+                logger.error('Exception:%s', e)
+                logger.error(traceback.format_exc())
+        elif sub == 'drm_download':
+            try:
+                from support.site.tving import SupportTving
+                code = request.form['code']
+                from terminal.logic_terminal import LogicTerminal
+                current = len(LogicTerminal.sid_list)
+                while True:
+                    if len(LogicTerminal.sid_list) != current:
+                        break
+                    time.sleep(0.1)
+                fd = LogicTerminal.pty_list[LogicTerminal.sid_list[-1]]['master']
+                py = os.path.join(path_app_root, 'lib2', 'support', 'site', 'tving.py')
+                quality = ModelSetting.get('quality')
+                quality = SupportTving.ins.get_quality_to_tving(quality)     
+                command = f"python3 {py} --code={code} --quality={quality} --token={SupportTving.ins.token} --folder_output={ModelSetting.get('save_path')} --folder_tmp={os.path.join(path_data, 'tmp')}"
+                if SupportTving.ins.proxy != None:
+                    command += f" --proxy={SupportTving.ins.proxy}"
+                if SupportTving.ins.deviceid != None:
+                    command += f" --deviceid={SupportTving.ins.deviceid}"
+                command += "\n"
+                os.write(fd, command.encode('utf8'))
+                return jsonify({'ret':'success'})
             except Exception as e: 
                 logger.error('Exception:%s', e)
                 logger.error(traceback.format_exc())
@@ -300,21 +316,6 @@ def ajax(sub):
 #########################################################
 # For UI                                                            
 #########################################################
-@blueprint.route('/api/<sub>', methods=['GET', 'POST'])
-def api(sub):
-    if sub == 'decrypt':
-        try: 
-            code = request.args.get('c')
-            quality = request.args.get('q')
-            token = request.args.get('t')
-            token = '_tving_token=%s' % py_urllib.quote(token)
-            ret = Tving.get_episode_json(code, quality)
-            return ret[1]
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
-            return str(e)        
-
 
 sid_list = []
 @socketio.on('connect', namespace='/%s' % package_name)

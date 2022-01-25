@@ -19,7 +19,6 @@ from framework.util import Util
 
 # 패키지
 from .plugin import logger, package_name
-import framework.tving.api as Tving
 from .model import ModelSetting, Episode
 from .basic import TvingBasic
 
@@ -103,7 +102,7 @@ class TvingProgram(object):
             TvingProgram.start()
             entity = TvingProgramEntity(episode_code, quality)
             ret = TvingBasic.get_episode_json(entity.episode_code, entity.quality)
-            entity.json_data = ret[0]
+            entity.json_data = ret
             TvingProgram.download_queue.put(entity)
         except Exception as e: 
             logger.error('Exception:%s', e)
@@ -131,8 +130,8 @@ class TvingProgram(object):
                 
                 #self.current_scan_entity.scan_start_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 #Log('* 스캔 큐 scan_start_time : %s', self.current_scan_entity.scan_start_time)
-                Tving._token = ModelSetting.get('token')
-                data, vod_url = TvingBasic.get_episode_json(entity.episode_code, entity.quality)
+                data = TvingBasic.get_episode_json(entity.episode_code, entity.quality)
+                vod_url = data['play_info']['url']
                 #logger.debug(data)
         
                 episode = Episode('basic')
@@ -145,7 +144,7 @@ class TvingProgram(object):
                 save_path = ModelSetting.get('program_auto_path')
 
                 if ModelSetting.get('program_auto_make_folder') == 'True':
-                    program_path = os.path.join(save_path, data['body']['content']['program_name'])
+                    program_path = os.path.join(save_path, data['content']['program_name'])
                     save_path = program_path
                 try:
                     if not os.path.exists(save_path):

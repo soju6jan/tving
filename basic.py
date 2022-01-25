@@ -16,36 +16,19 @@ from flask import Blueprint, request, Response, send_file, render_template, redi
 # sjva 공용
 from framework import app, db, scheduler, path_data
 from framework.job import Job
-import framework.tving.api as Tving
-
 # 패키지
 from .plugin import logger, package_name
 
 import ffmpeg
 
 from .model import ModelSetting, Episode
-
+from support.site.tving import SupportTving
 
 #########################################################
         
 class TvingBasic(object):
     current_episode = None #다운받을 에피소드. 화면에서 정보를 보여주고 난 이후에 다운받기 ㄸ문
     
-    @staticmethod
-    def login():
-        try:
-            token = Tving.do_login(
-                ModelSetting.get('id'), 
-                ModelSetting.get('pw'), 
-                ModelSetting.get('login_type')
-            )
-            if token is None:
-                return False
-            ModelSetting.set('token', token)
-            return True
-        except Exception as e: 
-            logger.error('Exception:%s', e)
-            logger.error(traceback.format_exc())
 
     @staticmethod
     def ffmpeg_listener(**arg):
@@ -96,19 +79,19 @@ class TvingBasic(object):
     @staticmethod
     def make_episode_by_json(episode, data, vod_url):
         try:
-            episode.episode_code = data["body"]["content"]["episode_code"]
-            for q in data["body"]["stream"]["quality"]:
+            episode.episode_code = data["content"]["episode_code"]
+            for q in data["stream"]["quality"]:
                 if q['selected'] == 'Y':
                     episode.quality = q['code']
                     break
-            episode.program_name = data["body"]["content"]["program_name"]
-            episode.program_code = data["body"]["content"]["program_code"]
-            episode.frequency = int(data["body"]["content"]["frequency"])
-            episode.broadcast_date = str(data["body"]["content"]["info"]["episode"]["broadcast_date"])[2:]
-            episode.channel_id = data["body"]["content"]["info"]["channel"]["code"]
-            episode.channel_name = data["body"]["content"]["info"]["channel"]["name"]["ko"]
+            episode.program_name = data["content"]["program_name"]
+            episode.program_code = data["content"]["program_code"]
+            episode.frequency = int(data["content"]["frequency"])
+            episode.broadcast_date = str(data["content"]["info"]["episode"]["broadcast_date"])[2:]
+            episode.channel_id = data["content"]["info"]["channel"]["code"]
+            episode.channel_name = data["content"]["info"]["channel"]["name"]["ko"]
             episode.json = data
-            episode.filename = Tving.get_filename(data)
+            episode.filename = SupportTving.ins.get_filename(data)
             if vod_url.find('quickvod') != -1:
                 episode.filename = episode.filename.replace('-ST.mp4', '-STQ.mp4')
             episode.vod_url = vod_url
@@ -116,7 +99,7 @@ class TvingBasic(object):
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc())
-            logger.debug(data["body"]["content"]["program_name"])
+            logger.debug(data["content"]["program_name"])
     
     @staticmethod
     def analyze(url):
@@ -137,25 +120,21 @@ class TvingBasic(object):
             if url_type is None:
                 return {'url_type':'None'}
             elif url_type == 'episode':
-                quality = ModelSetting.get('quality')
-                quality = Tving.get_quality_to_tving(quality)                
-                try:
-                    data, vod_url = TvingBasic.get_episode_json(code, quality)
-                except TypeError as e:
-                    data, vod_url = None, None
+                data = TvingBasic.get_episode_json(code)
+                vod_url = data['play_info']['url'] 
                 logger.debug(vod_url)
                 if data is not None:
                     episode = Episode('basic')
                     episode = TvingBasic.make_episode_by_json(episode, data, vod_url)
                     TvingBasic.current_episode = episode
-                    return {'url_type': url_type, 'ret' : True, 'code': code, 'data' : episode.as_dict()}
+                    return {'url_type': url_type, 'ret' : True, 'code': code, 'data':data, 'info' : episode.as_dict()}
                 else:
                     return {'url_type': url_type, 'ret' : False, 'data' : {'message': '에피소드 정보를 얻지 못함'}}
             elif url_type == 'program':
-                data = Tving.get_vod_list(Tving.config['program_param'] % code, page=1)
+                data = SupportTving.ins.get_vod_list(program_code=code)
                 return {'url_type': url_type, 'page':'1', 'code':code, 'data' : data}
             elif url_type == 'movie':
-                data = Tving.get_movie_json(code)
+                data = TvingBasic.get_episode_json(code)
                 return {'url_type': url_type, 'page':'1', 'code':code, 'data' : data}
         except Exception as e: 
             logger.error('Exception:%s', e)
@@ -198,7 +177,7 @@ class TvingBasic(object):
     @staticmethod
     def analyze_program_page(code, page):
         try:
-            data = Tving.get_vod_list(Tving.config['program_param'] % code, page=int(page))
+            data = SupportTving.ins.get_vod_list(program_code=code, page=page)
             return {'url_type': 'program', 'page':page, 'code':code, 'data' : data}
             
         except Exception as e: 
@@ -206,10 +185,13 @@ class TvingBasic(object):
             logger.error(traceback.format_exc())        
 
     @staticmethod
-    def get_episode_json(code, quality):
+    def get_episode_json(code, quality=None):
         try:
-            ret = Tving.get_episode_json(code, quality)
-            return ret
+            if quality == None:
+                quality = ModelSetting.get('quality')
+                quality = SupportTving.ins.get_quality_to_tving(quality)                
+            data = SupportTving.ins.get_info(code, quality)
+            return data
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc()) 

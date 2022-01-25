@@ -226,8 +226,13 @@ function make_list(ret) {
     str += m_row_start();
     tmp = ''
     if (data[i].json != null)  {
+      if (data[i].json.body == null) {
+        info = data[i].json;
+      } else {
+        info = data[i].json.body;
+      }
       try {
-      tmp = "http://image.tving.com" + data[i].json.body.content.info.episode.image[0].url;
+      tmp = "http://image.tving.com" + info.content.info.episode.image[0].url;
       tmp = '<img src="' + tmp + '" class="img-fluid">'
       } catch(e) {
       }
@@ -235,14 +240,14 @@ function make_list(ret) {
       tmp = '';
       if (poster_view == '0' || poster_view == '1') {
         try {
-          img_idx = data[i].json.body.content.info.program.image.findIndex((item, idx) => {
+          img_idx = info.content.info.program.image.findIndex((item, idx) => {
             return item.code === 'CAIP1500';
           });
-          img_url = data[i].json.body.content.info.program.image[img_idx].url;
-          if (data[i].json.body.content.info.program.quickup_yn != 'Y' && data[i].json.body.content.info.episode.image[0] != null && poster_view == '0') {
-            img_url = data[i].json.body.content.info.episode.image[0].url;
+          img_url = info.content.info.program.image[img_idx].url;
+          if (info.content.info.program.quickup_yn != 'Y' && info.content.info.episode.image[0] != null && poster_view == '0') {
+            img_url = info.content.info.episode.image[0].url;
           }
-          if (data[i].json.body.content.info.program.quickup_yn == 'Y') {
+          if (info.content.info.program.quickup_yn == 'Y') {
             tmp += '<span class="program-item__image-tag tag-quickup">Quick VOD</span>';
           }
           tmp += '<img src="http://image.tving.com/crop_cdn.php?u=http://image.tving.com' + img_url + '&w=210" class="rounded img-fluid">';
@@ -250,11 +255,11 @@ function make_list(ret) {
         str += m_col(3, tmp);
       } else {
         try {
-          img_idx = data[i].json.body.content.info.program.image.findIndex((item, idx) => {
+          img_idx = info.content.info.program.image.findIndex((item, idx) => {
             return item.code === 'CAIP0900';
           });
-          img_url = data[i].json.body.content.info.program.image[img_idx].url;
-          if (data[i].json.body.content.info.program.quickup_yn == 'Y') {
+          img_url = info.content.info.program.image[img_idx].url;
+          if (info.content.info.program.quickup_yn == 'Y') {
             tmp += '<span class="program-item__image-tag tag-quickup">QVOD</span>';
           }
           tmp += '<img src="http://image.tving.com' + img_url + '/dims/resize/236" class="rounded img-fluid">';

@@ -18,8 +18,7 @@ from framework.util import Util
 
 # 패키지
 from .plugin import logger, package_name
-import framework.tving.api as Tving
-
+from support.site.tving import SupportTving
 from .model import ModelSetting, Episode
 from .basic import TvingBasic
 
@@ -36,7 +35,7 @@ class TvingAuto(object):
             page = ModelSetting.get_int('auto_page')
             max_pf_count = ModelSetting.get('max_pf_count')
             save_path = ModelSetting.get('auto_save_path')
-            default_quality = Tving.get_quality_to_tving(ModelSetting.get('auto_quality'))
+            default_quality = SupportTving.ins.get_quality_to_tving(ModelSetting.get('auto_quality'))
             retry_user_abort = ModelSetting.get_bool('retry_user_abort')
             except_channel = ModelSetting.get('except_channel')
             except_program = ModelSetting.get(key='except_program')
@@ -59,10 +58,8 @@ class TvingAuto(object):
             logger.debug('except_programs:%s', except_programs)
             logger.debug('download_qvod :%s %s', download_qvod, type(download_qvod))
             logger.debug('download_program_in_qvods:%s', download_program_in_qvods)
-            from support.site.tving import SupportTving
-            support_tving = SupportTving(token=SystemModelSetting.get('site_tving_token').split('=')[1], proxy=Tving.get_proxy(), deviceid=SystemModelSetting.get('site_tving_deviceid'))
             for i in range(1, page+1):
-                vod_list = Tving.get_vod_list(page=i)["body"]["result"]
+                vod_list = SupportTving.ins.get_vod_list(page=i)["result"]
                 #for vod in [x for x in vod_list if x['episode']['drm_yn'].lower() != 'y']:
                 for vod in vod_list:
                     try:
@@ -103,11 +100,8 @@ class TvingAuto(object):
                                     continue
                             # URL때문에 DB에 있어도 다시 JSON을 받아야함.
                             #json_data, url = TvingBasic.get_episode_json(code, default_quality)
-                            json_data = support_tving.get_stream_info(code, default_quality)
-                            if json_data['body']['drm']:
-                                url = json_data['body']['play_info']['uri']
-                            else:
-                                url = json_data['body']['broad_url']
+                            json_data = SupportTving.ins.get_info(code, default_quality)
+                            url = json_data['play_info']['url']
                             if episode is None:
                                 #slogger.debug('EPISODE is none')
                                 episode = Episode('auto')
@@ -172,7 +166,7 @@ class TvingAuto(object):
                                 db.session.commit()
                                 time.sleep(2)
                                 continue
-                            if json_data['body']['drm'] == False:
+                            if json_data['play_info']['drm'] == False:
                                 logger.debug('FFMPEG Start.. id:%s', episode.id)
                                 if episode.id is None:
                                     logger.debug('PROGRAM:%s', episode.program_name)
@@ -181,8 +175,8 @@ class TvingAuto(object):
                                 f.start_and_wait()
                             else:
                                 from .tving_dd import TvingDD
-                                json_data['body']['save_path'] = save_path
-                                ret = TvingDD.download(json_data['body'])
+                                json_data['save_path'] = save_path
+                                ret = TvingDD.download(json_data)
                                 if ret:
                                     episode.completed = True
                                     episode.end_time = datetime.now()

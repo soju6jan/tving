@@ -18,7 +18,6 @@ from framework import app, db, scheduler, path_data
 from framework.logger import get_logger
 from framework.job import Job
 from framework.util import Util
-#import framework.tving.api as Tving
 
 # 패키지
 from .plugin import logger, package_name
@@ -77,8 +76,7 @@ class Logic(object):
             logger.debug('%s plugin_load', package_name)
             # DB 초기화
             Logic.db_init()
-            TvingBasic.login()
-
+            
             if ModelSetting.get('auto_start') == 'True':
                 Logic.scheduler_start()
 

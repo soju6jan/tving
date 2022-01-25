@@ -125,7 +125,7 @@ function make_program_page(ret) {
     str += tmp
   }
 
-  data = ret.data.body.result
+  data = ret.data.result
   str += '<hr>';
   for (i in data) {
     //m_modal(data[i])
@@ -184,7 +184,7 @@ function make_program_page(ret) {
   str += "<div id='detail"+(parseInt(ret.page)+1)+"'></div>"
   document.getElementById("detail"+parseInt(ret.page)).innerHTML = str;
   
-  if (ret.data.body.has_more == 'Y') {
+  if (ret.data.has_more == 'Y') {
     str = '<div class="d-inline-block"></div><form>';
     str += '<button id="more_btn" class="btn btn-outline-secondary btn-lg btn-block" type="button" data-code="'+ret.code+'" data-page="'+ret.page+'">More</button>'
     str += '</form>';
