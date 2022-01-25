@@ -166,7 +166,7 @@ class TvingAuto(object):
                                 db.session.commit()
                                 time.sleep(2)
                                 continue
-                            if json_data['play_info']['drm'] == False:
+                            if json_data['drm'] == False:
                                 logger.debug('FFMPEG Start.. id:%s', episode.id)
                                 if episode.id is None:
                                     logger.debug('PROGRAM:%s', episode.program_name)
