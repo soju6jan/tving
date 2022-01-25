@@ -148,7 +148,9 @@ class TvingBasic(object):
             TvingBasic.current_episode.start_time = datetime.now()
             db.session.add(TvingBasic.current_episode)
             db.session.commit()
-            f = ffmpeg.Ffmpeg(url, TvingBasic.current_episode.filename, plugin_id=TvingBasic.current_episode.id, listener=TvingBasic.ffmpeg_listener, max_pf_count=max_pf_count, call_plugin='tving_basic', save_path=save_path)
+
+            #logger.error(TvingBasic.get_headers(url))
+            f = ffmpeg.Ffmpeg(url, TvingBasic.current_episode.filename, plugin_id=TvingBasic.current_episode.id, listener=TvingBasic.ffmpeg_listener, max_pf_count=max_pf_count, call_plugin='tving_basic', save_path=save_path, headers=TvingBasic.get_headers(url))
             #f.start_and_wait()
             f.start()
             #time.sleep(60)
@@ -195,3 +197,15 @@ class TvingBasic(object):
         except Exception as e: 
             logger.error('Exception:%s', e)
             logger.error(traceback.format_exc()) 
+
+    @staticmethod
+    def get_headers(url):
+        if 'quickvod' in url:
+            params = {}
+            for tmp in url.split('?')[1].split('&'):
+                tmp2 = tmp.split('=')
+                params[tmp2[0]] = tmp2[1]
+            cookie = f"CloudFront-Key-Pair-Id={params['Key-Pair-Id']}; CloudFront-Policy={params['Policy']}; CloudFront-Signature={params['Signature']};"
+            headers = {'Cookie':cookie}
+            return headers
+

@@ -170,8 +170,7 @@ class TvingAuto(object):
                                 logger.debug('FFMPEG Start.. id:%s', episode.id)
                                 if episode.id is None:
                                     logger.debug('PROGRAM:%s', episode.program_name)
-                                
-                                f = ffmpeg.Ffmpeg(url, episode.filename, plugin_id=episode.id, listener=TvingBasic.ffmpeg_listener, max_pf_count=max_pf_count, call_plugin='%s_recent' % package_name, save_path=save_path)
+                                f = ffmpeg.Ffmpeg(url, episode.filename, plugin_id=episode.id, listener=TvingBasic.ffmpeg_listener, max_pf_count=max_pf_count, call_plugin='%s_recent' % package_name, save_path=save_path, headers=TvingBasic.get_headers(url))
                                 f.start_and_wait()
                             else:
                                 from .tving_dd import TvingDD

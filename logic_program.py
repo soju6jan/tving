@@ -158,7 +158,7 @@ class TvingProgram(object):
                     plugin.socketio_list_refresh()
                     continue
 
-                f = ffmpeg.Ffmpeg(vod_url, episode.filename, plugin_id=entity.entity_id, listener=TvingProgram.ffmpeg_listener, max_pf_count=max_pf_count, call_plugin='%s_program' % package_name, save_path=save_path)
+                f = ffmpeg.Ffmpeg(vod_url, episode.filename, plugin_id=entity.entity_id, listener=TvingProgram.ffmpeg_listener, max_pf_count=max_pf_count, call_plugin='%s_program' % package_name, save_path=save_path, headers=TvingBasic.get_headers(vod_url))
                 f.start()
                 TvingProgram.current_ffmpeg_count += 1
                     
